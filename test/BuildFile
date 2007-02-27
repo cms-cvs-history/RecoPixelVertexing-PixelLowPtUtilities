@@ -1,0 +1,44 @@
+<use name=boost>
+<use name=root>
+
+<use name=FWCore/Framework>
+<use name=Foundation/PluginManager>
+<use name=FWCore/ParameterSet>
+
+<use name=Geometry/Records>
+<use name=Geometry/CommonDetUnit>
+<use name=Geometry/TrackerGeometryBuilder>
+
+<use name=DataFormats/TrackerRecHit2D>
+<use name=RecoTracker/TkHitPairs>
+<use name=RecoTracker/TkTrackingRegions>
+<use name=RecoPixelVertexing/PixelTriplets>
+
+#####################
+# LowPtTrackAnalyzer
+
+<library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
+ <use name=RecoPixelVertexing/PixelLowPtUtilities>
+#<use name=RecoPixelVertexing/PixelTrackFitting>
+ <use name=RecoPixelVertexing/PixelVertexFinding>
+
+ <use name=DataFormats/VZero>
+ <use name=RecoVertex/VertexTools>
+
+ <use name=IOMC/GeneratorInterface>
+ <use name=SimDataFormats/HepMCProduct>
+ <use name=SimDataFormats/TrackingAnalysis>
+ <use name=SimDataFormats/Track>
+ <use name=SimDataFormats/Vertex>
+ <use name=SimDataFormats/HepMCProduct>
+
+ <use name=SimTracker/TrackAssociation> 
+
+ <use name=Geometry/TrackerTopology>
+
+ <use name=clhep>
+ <use name=geant4>
+
+ <flags SEAL_PLUGIN_NAME="LowPtTrackAnalyzer">
+</library>
+

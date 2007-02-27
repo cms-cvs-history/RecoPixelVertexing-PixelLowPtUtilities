@@ -1,0 +1,25 @@
+# Magnetic field
+include "MagneticField/Engine/data/volumeBasedMagneticField.cfi"
+
+# Geometry (all CMS)
+include "Geometry/CMSCommonData/data/cmsIdealGeometryXML.cfi"
+ 
+# Tracker Geometry Builder
+include "Geometry/TrackerGeometryBuilder/data/trackerGeometry.cfi"
+ 
+# Tracker Numbering Builder
+include "Geometry/TrackerNumberingBuilder/data/trackerNumberingGeometry.cfi"
+ 
+# Reco geometry 
+include "RecoTracker/GeometryESProducer/data/TrackerRecoGeometryESProducer.cfi"
+ 
+# for Transient rechits?
+include "RecoLocalTracker/SiPixelRecHits/data/PixelCPEParmError.cfi"
+ 
+es_module ttrhb4PixelTriplets = ttrhbwr from "RecoTracker/TransientTrackingRecHit/data/TransientTrackingRecHitBuilder.cfi"
+replace ttrhb4PixelTriplets.StripCPE = "Fake"
+replace ttrhb4PixelTriplets.ComponentName = "TTRHBuilder4PixelTriplets"
+ 
+include "RecoTracker/TransientTrackingRecHit/data/TransientTrackingRecHitBuilderWithoutRefit.cfi"
+ 
+include "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracks.cfi"
