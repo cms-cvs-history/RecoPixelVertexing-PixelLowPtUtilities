@@ -2,38 +2,35 @@ module pixelLowPtTracks = PixelTrackProducer {
 
   InputTag HitCollectionLabel = siPixelRecHits
 
-  PSet RegionFactoryPSet = {
-    string ComponentName = "GlobalRegionProducer"
-    PSet RegionPSet = {
-      double ptMin = 0.075 // GeV/c
-      double originRadius     = 0.2  // cm
-      double originHalfLength = 15.0 // cm
-      double originZPos       = 0.0  // cm
-      bool precise = false
-    }
-  }
-
-  PSet OrderedHitsFactoryPSet = {
-    string ComponentName = "PixelTripletLowPtGenerator"
-    PSet GeneratorPSet = {
-      bool useClusterShape = true
-    }
-  }
-
+  string Fitter = "LowPtPixelFitterByHelixProjections" 
   PSet   FitterPSet = {
-    string ComponentName = "LowPtPixelFitterByHelixProjections" 
     string TTRHBuilder = "TTRHBuilder4PixelTriplets"
   }
 
+  string Filter = "PixelTrackFilterByKinematics"
   PSet   FilterPSet = {
-    string ComponentName = "PixelTrackFilterByKinematics"
     double ptMin  = 0.
     double tipMax = 1e+30
     double chi2   = 1e+30
   }
 
-  PSet   CleanerPSet = {
-    string ComponentName = "LowPtPixelTrackCleanerBySharedHits"
+  string Cleaner = "LowPtPixelTrackCleanerBySharedHits"
+  PSet   CleanerPSet = {}
+
+  PSet TripletsPSet = {
+    string Generator = "PixelTripletLowPtGenerator"
+    PSet GeneratorPSet = {
+      bool useClusterShape = true
+    }
   }
+
+  PSet RegionPSet = {
+    double ptMin = 0.075 // GeV/c
+    double originRadius     = 0.2  // cm
+    double originHalfLength = 15.0 // cm
+    double originZPos       = 0.0  // cm
+    bool precise = false
+  }
+ 
 }
 
