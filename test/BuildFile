@@ -37,6 +37,6 @@
  <use name=clhep>
  <use name=geant4>
 
- <flags SEAL_PLUGIN_NAME="LowPtTrackAnalyzer">
+ <flags EDM_PLUGIN=1>
 </library>
 
