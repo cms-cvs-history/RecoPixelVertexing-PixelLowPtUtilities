@@ -18,9 +18,9 @@
 # LowPtTrackAnalyzer
 
 <library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
- <use name=RecoPixelVertexing/PixelLowPtUtilities>
-#<use name=RecoPixelVertexing/PixelTrackFitting>
- <use name=RecoPixelVertexing/PixelVertexFinding>
+# <use name=RecoPixelVertexing/PixelLowPtUtilities>
+# <use name=RecoPixelVertexing/PixelTrackFitting>
+# <use name=RecoPixelVertexing/PixelVertexFinding>
 
  <use name=DataFormats/VZero>
  <use name=RecoVertex/VertexTools>
