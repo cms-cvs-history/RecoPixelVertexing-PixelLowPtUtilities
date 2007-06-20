@@ -1,0 +1,6 @@
+untracked vstring fileNames =
+{
+ 'file:/afs/kfki.hu/scratch/sikler/cmssw/aachydjet_120/recHits_1.root',
+ 'file:/afs/kfki.hu/scratch/sikler/cmssw/aachydjet_120/recHits_7.root',
+ 'file:/afs/kfki.hu/scratch/sikler/cmssw/aachydjet_120/recHits_9.root'
+}

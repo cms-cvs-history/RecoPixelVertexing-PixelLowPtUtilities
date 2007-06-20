@@ -1,0 +1,4 @@
+module pixelTrackSeeds = PixelTrackSeedProducer
+{
+  vstring tripletList = { }
+}
