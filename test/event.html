@@ -1,6 +1,7 @@
 <html>
 
 <head>
+<link rel="shortcut icon" href="cms.ico">
 <title>Event viewer</title>
 
 <script type="text/javascript">
@@ -33,6 +34,7 @@ function loadFiles()
 
   loadFile('pixelDetUnits.m','pixelDetUnits');
 
+  loadFile('pixelHitsSingle.m','pixelHitsSingle');
   loadFile('stripHitsSingle.m','stripHitsSingle');
   loadFile('stripHitsMatched.m','stripHitsMatched');
   loadFile('stripDetUnits.m','stripDetUnits');
@@ -62,10 +64,12 @@ function parseForm(theForm)
   if(theForm.stripDetUnits.checked) plotList +=
     ", RGBColor[0.6,0.6,0.6]" + window.stripDetUnits;
 
+  if(theForm.pixelHitsSingle.checked) plotList +=
+    ", RGBColor[0.4,0.4,1.0], AbsolutePointSize[5]" + window.pixelHitsSingle;
   if(theForm.stripHitsSingle.checked) plotList +=
-    ", RGBColor[0.4,0.4,1.0]" + window.stripHitsSingle;
+    ", RGBColor[0.4,0.4,1.0], AbsolutePointSize[5]" + window.stripHitsSingle;
   if(theForm.stripHitsMatched.checked) plotList +=
-    ", RGBColor[0.3,0.3,0.8]" + window.stripHitsMatched;
+    ", RGBColor[0.3,0.3,0.8], AbsolutePointSize[5]" + window.stripHitsMatched;
 
   if(theForm.simTracks.checked) plotList +=
     ", RGBColor[0.5,0.5,0.5]" + window.simTracks;
@@ -123,22 +127,29 @@ function parseForm(theForm)
   onclick="parseForm(this.form);"> Pixel simHits <br>
  <input type="checkbox" name="stripSimHits" checked
   onclick="parseForm(this.form);"> Strip simHits <br>
+ <hr>
+ <input type="checkbox" name="pixelHitsSingle"
+  onclick="parseForm(this.form);"> Pixel recHits single <br>
  <input type="checkbox" name="stripHitsSingle"
   onclick="parseForm(this.form);"> Strip recHits single <br>
  <input type="checkbox" name="stripHitsMatched"
   onclick="parseForm(this.form);"> Strip recHits matched <br>
+ <hr>
  <input type="checkbox" name="pixelRecHits" checked
-  onclick="parseForm(this.form);"> Pixel recHits <br>
+  onclick="parseForm(this.form);"> Pixel recHits on tracks <br>
  <input type="checkbox" name="stripRecHits" checked
-  onclick="parseForm(this.form);"> Strip recHits <br>
+  onclick="parseForm(this.form);"> Strip recHits on tracks <br>
+ <hr>
  <input type="checkbox" name="pixelDetUnits"
   onclick="parseForm(this.form);"> Pixel detUnits <br>
  <input type="checkbox" name="stripDetUnits"
   onclick="parseForm(this.form);"> Strip detUnits <br>
+ <hr>
  <input type="checkbox" name="recTracks" checked
   onclick="parseForm(this.form);"> recTracks <br>
- <input type="checkbox" name="simTracks"
+ <input type="checkbox" name="simTracks" checked
   onclick="parseForm(this.form);"> simTracks <br>
+ <hr>
  <input type="checkbox" name="vZeros" checked
   onclick="parseForm(this.form);"> vZeros <br>
  <input type="checkbox" name="vertices" checked

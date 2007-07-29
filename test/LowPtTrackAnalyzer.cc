@@ -13,6 +13,7 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "RecoPixelVertexing/PixelLowPtUtilities/interface/EventPlotter.h"
+#include "RecoPixelVertexing/PixelLowPtUtilities/interface/TrackRefitter.h"
 
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "SimTracker/TrackAssociation/interface/TrackAssociatorByHits.h"
@@ -262,6 +263,9 @@ void LowPtTrackAnalyzer::checkSimTracks
     result.push_back(simTrack->vertex().Rho());
     result.push_back(getNumberOfPixelHits(*simTrack));
 
+    // Acceptable: simhits in at least 3 different pixel layers
+    // How many rectracks it gives:
+
     // rec
     int nRec = 0;
     try
@@ -368,6 +372,10 @@ void LowPtTrackAnalyzer::analyze
   // Get reconstructed
   edm::Handle<reco::TrackCollection> recCollection;
   ev.getByLabel("ctfTripletTracks",  recCollection);
+
+  // Refit with vertex constraint (NEW)
+  TrackRefitter theTrackRefitter(es);
+  theTrackRefitter.refitTracks(ev);
 
   // Associators
   reco::SimToRecoCollection simToReco =
