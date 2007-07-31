@@ -13,7 +13,6 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "RecoPixelVertexing/PixelLowPtUtilities/interface/EventPlotter.h"
-#include "RecoPixelVertexing/PixelLowPtUtilities/interface/TrackRefitter.h"
 
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "SimTracker/TrackAssociation/interface/TrackAssociatorByHits.h"
@@ -35,12 +34,31 @@
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+
+class TransientTrackFromFTSFactory {
+ public:
+
+    reco::TransientTrack build (const FreeTrajectoryState & fts) const;
+    reco::TransientTrack build (const FreeTrajectoryState & fts,
+        const edm::ESHandle<GlobalTrackingGeometry>& trackingGeometry);
+};
+
+#include "RecoVertex/KalmanVertexFit/interface/SingleTrackVertexConstraint.h"
+
 #include "TROOT.h"
 #include "TFile.h"
 #include "TNtuple.h"
 
 #include <fstream>
 using namespace std;
+using namespace reco;
+using namespace edm;
 
 /*****************************************************************************/
 class LowPtTrackAnalyzer : public edm::EDAnalyzer
@@ -59,11 +77,16 @@ class LowPtTrackAnalyzer : public edm::EDAnalyzer
    int getNumberOfPixelHits(const TrackingParticle& simTrack);
    void checkSimTracks(edm::Handle<TrackingParticleCollection>& simCollection,
                        reco::SimToRecoCollection& q);
+   float refitWithVertex(const reco::Track & recTrack,
+                        const reco::VertexCollection* vertices);
    void checkRecTracks(edm::Handle<reco::TrackCollection>& recCollection,
+                       const reco::VertexCollection* vertices,
                        reco::RecoToSimCollection& p);
 
    const TrackerGeometry* theTracker;
    const TrackAssociatorByHits* theAssociatorByHits;
+
+   const TransientTrackBuilder * theTTBuilder;
 
    TFile * resultFile; 
    TNtuple * trackSim;
@@ -93,12 +116,17 @@ void LowPtTrackAnalyzer::beginJob(const edm::EventSetup& es)
   es.get<TrackerDigiGeometryRecord>().get(tracker);
   theTracker = tracker.product();
  
-  // Get aassociator
+  // Get associator
   edm::ESHandle<TrackAssociatorBase> theHitsAssociator;
   es.get<TrackAssociatorRecord>().get("TrackAssociatorByHits",
                                     theHitsAssociator);
   theAssociatorByHits =
    (const TrackAssociatorByHits*)theHitsAssociator.product();
+
+  // Get transient track builder
+  edm::ESHandle<TransientTrackBuilder> builder;
+  es.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
+  theTTBuilder = builder.product();
  
   // Root
   resultFile = new TFile("result.root","recreate");
@@ -107,7 +135,7 @@ void LowPtTrackAnalyzer::beginJob(const edm::EventSetup& es)
   trackSim = new TNtuple("trackSim","trackSim",
     "id:eta:pt:d0:nhit:nrec");
   trackRec = new TNtuple("trackRec","trackRec",
-    "qr:etar:ptr:d0r:nsim:ids:parids:etas:pts:d0s");
+    "qr:etar:ptr:ptv:d0r:nsim:ids:parids:etas:pts:d0s");
 
 }
 
@@ -293,8 +321,63 @@ void LowPtTrackAnalyzer::checkSimTracks
 }
 
 /*****************************************************************************/
+float LowPtTrackAnalyzer::refitWithVertex
+  (const reco::Track & recTrack,
+   const reco::VertexCollection* vertices)
+{
+  TransientTrack theTransientTrack = theTTBuilder->build(recTrack);
+
+  if(vertices->size() > 0)
+  {
+    float dzmin = -1.;
+    const reco::Vertex * closestVertex = 0;
+
+    for(reco::VertexCollection::const_iterator
+        vertex = vertices->begin(); vertex!= vertices->end(); vertex++)
+    {
+      float dz = fabs(recTrack.vertex().z() - vertex->position().z());
+      if(vertex == vertices->begin() || dz < dzmin)
+      { dzmin = dz ; closestVertex = &(*vertex); }
+    }
+  
+    std::cerr << " Close " << recTrack.vertex().z()
+                    << " " << closestVertex->position().z() << std::endl;
+  
+    GlobalPoint vertexPosition(closestVertex->position().x(),
+                               closestVertex->position().y(),
+                               closestVertex->position().z());
+
+/*
+    GlobalError vertexError(closestVertex->covariance(0,0),
+                            closestVertex->covariance(1,0),
+                            closestVertex->covariance(1,1),
+                            closestVertex->covariance(2,0),
+                            closestVertex->covariance(2,1),
+                            closestVertex->covariance(2,2));
+*/
+    GlobalError vertexError(1e-6,0.,1e-6, 0.,0.,1e-6);
+
+
+    SingleTrackVertexConstraint stvc;
+    pair<TransientTrack, float> result =
+      stvc.constrain(theTransientTrack, vertexPosition, vertexError);
+
+/*
+    cerr << " refit: " << recTrack.momentum()
+             << " -> " << result.first.impactPointTSCP().momentum() << endl
+        << "       : " << vertexPosition
+             << " -> " << result.first.impactPointTSCP().position() << endl;
+*/
+
+    return result.first.impactPointTSCP().pt();
+  }
+  else
+    return recTrack.pt();
+}
+/*****************************************************************************/
 void LowPtTrackAnalyzer::checkRecTracks
   (edm::Handle<reco::TrackCollection>& recCollection,
+   const reco::VertexCollection* vertices,
    reco::RecoToSimCollection& p)
 {
   for(reco::TrackCollection::size_type i=0;
@@ -308,6 +391,9 @@ void LowPtTrackAnalyzer::checkRecTracks
     result.push_back(recTrack->charge());
     result.push_back(recTrack->eta());
     result.push_back(recTrack->pt());
+
+    result.push_back(refitWithVertex(*recTrack,vertices)); // ptv
+
     result.push_back(recTrack->d0());
 
     // sim 
@@ -373,9 +459,10 @@ void LowPtTrackAnalyzer::analyze
   edm::Handle<reco::TrackCollection> recCollection;
   ev.getByLabel("ctfTripletTracks",  recCollection);
 
-  // Refit with vertex constraint (NEW)
-  TrackRefitter theTrackRefitter(es);
-  theTrackRefitter.refitTracks(ev);
+  // Get vertices
+  edm::Handle<reco::VertexCollection> vertexCollection;
+  ev.getByType(vertexCollection);
+  const reco::VertexCollection * vertices = vertexCollection.product();
 
   // Associators
   reco::SimToRecoCollection simToReco =
@@ -384,8 +471,8 @@ void LowPtTrackAnalyzer::analyze
     theAssociatorByHits->associateRecoToSim(recCollection, simCollection,&ev);
 
   // Analyze
-  checkSimTracks(simCollection, simToReco);
-  checkRecTracks(recCollection, recoToSim);
+  checkSimTracks(simCollection,           simToReco);
+  checkRecTracks(recCollection, vertices, recoToSim);
 
   // Plot event
   if(plotEvent)

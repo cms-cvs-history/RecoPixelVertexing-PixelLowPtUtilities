@@ -28,11 +28,11 @@
 
 <use name=Geometry/TrackerTopology>
 
+<use name=RecoVertex/KalmanVertexFit>
+
 <use name=clhep>
 <use name=geant4>
-
 
 <library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
 <flags EDM_PLUGIN=1>
 </library>
-
