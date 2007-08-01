@@ -77,8 +77,8 @@ class LowPtTrackAnalyzer : public edm::EDAnalyzer
    int getNumberOfPixelHits(const TrackingParticle& simTrack);
    void checkSimTracks(edm::Handle<TrackingParticleCollection>& simCollection,
                        reco::SimToRecoCollection& q);
-   float refitWithVertex(const reco::Track & recTrack,
-                        const reco::VertexCollection* vertices);
+   pair<float,float> refitWithVertex(const reco::Track & recTrack,
+                                     const reco::VertexCollection* vertices);
    void checkRecTracks(edm::Handle<reco::TrackCollection>& recCollection,
                        const reco::VertexCollection* vertices,
                        reco::RecoToSimCollection& p);
@@ -92,13 +92,16 @@ class LowPtTrackAnalyzer : public edm::EDAnalyzer
    TNtuple * trackSim;
    TNtuple * trackRec;
 
-   bool plotEvent;
-   bool zipFiles;
+   string trackCollectionLabel, resultFileLabel;
+   bool plotEvent, zipFiles;
 };
 
 /*****************************************************************************/
 LowPtTrackAnalyzer::LowPtTrackAnalyzer(const edm::ParameterSet& pset)
 {
+  trackCollectionLabel = pset.getParameter<string>("trackCollection");
+  resultFileLabel      = pset.getParameter<string>("resultFile");
+
   plotEvent = pset.getParameter<bool>("plotEvent");
   zipFiles  = pset.getParameter<bool>("zipFiles");
 }
@@ -129,14 +132,13 @@ void LowPtTrackAnalyzer::beginJob(const edm::EventSetup& es)
   theTTBuilder = builder.product();
  
   // Root
-  resultFile = new TFile("result.root","recreate");
+  resultFile = new TFile(resultFileLabel.c_str(),"recreate");
   resultFile->cd();
    
   trackSim = new TNtuple("trackSim","trackSim",
-    "id:eta:pt:d0:nhit:nrec");
+    "ids:etas:pts:rhos:nhits:nrec:qr:etar:ptr:d0r");
   trackRec = new TNtuple("trackRec","trackRec",
-    "qr:etar:ptr:ptv:d0r:nsim:ids:parids:etas:pts:d0s");
-
+     "qr:etar:ptr:ptv:dzv,d0r:nsim:ids:parids:etas:pts:rhos");
 }
 
 /*****************************************************************************/
@@ -285,17 +287,16 @@ void LowPtTrackAnalyzer::checkSimTracks
     vector<float> result;
 
     // sim
-    result.push_back(simTrack->pdgId());
-    result.push_back(simTrack->eta());
-    result.push_back(simTrack->pt());
-    result.push_back(simTrack->vertex().Rho());
-    result.push_back(getNumberOfPixelHits(*simTrack));
-
-    // Acceptable: simhits in at least 3 different pixel layers
-    // How many rectracks it gives:
+    result.push_back(simTrack->pdgId());               // ids
+    result.push_back(simTrack->eta());                 // etas
+    result.push_back(simTrack->pt());                  // pts
+    result.push_back(simTrack->vertex().Rho());        // rhos
+    result.push_back(getNumberOfPixelHits(*simTrack)); // nhits >= 3 accepted
 
     // rec
+    reco::TrackRef matchedRecTrack;
     int nRec = 0;
+
     try
     {
       vector<pair<reco::TrackRef, double> > recTracks = q[simTrack];
@@ -307,13 +308,31 @@ void LowPtTrackAnalyzer::checkSimTracks
         int nShared =
          (int)(it->second * getNumberOfSimHits(*simTrack) + 0.5);
 
-        if(nShared >= 3) nRec++;
+        if(nShared > recTrack->found() / 2 &&
+           nShared >= 3)
+        { matchedRecTrack = recTrack; nRec++; }
       }
     }
     catch (cms::Exception& event)
     { }
 
-    result.push_back(nRec);
+    result.push_back(nRec); // nrec
+
+    if(nRec > 0)
+    {
+      result.push_back(matchedRecTrack->charge()); // qr
+      result.push_back(matchedRecTrack->eta());    // etar
+      result.push_back(matchedRecTrack->pt());     // ptr
+      result.push_back(matchedRecTrack->d0());     // d0r
+    }
+    else
+    {
+      result.push_back(-9999);
+      result.push_back(-9999);
+      result.push_back(-9999);
+      result.push_back(-9999);
+    }
+
 
     // fill
     trackSim->Fill(&result[0]);
@@ -321,17 +340,19 @@ void LowPtTrackAnalyzer::checkSimTracks
 }
 
 /*****************************************************************************/
-float LowPtTrackAnalyzer::refitWithVertex
+pair<float,float> LowPtTrackAnalyzer::refitWithVertex
   (const reco::Track & recTrack,
    const reco::VertexCollection* vertices)
 {
   TransientTrack theTransientTrack = theTTBuilder->build(recTrack);
 
+  // If there are vertices found
   if(vertices->size() > 0)
   {
     float dzmin = -1.;
     const reco::Vertex * closestVertex = 0;
 
+    // Look for the closest vertex in z
     for(reco::VertexCollection::const_iterator
         vertex = vertices->begin(); vertex!= vertices->end(); vertex++)
     {
@@ -340,40 +361,28 @@ float LowPtTrackAnalyzer::refitWithVertex
       { dzmin = dz ; closestVertex = &(*vertex); }
     }
   
-    std::cerr << " Close " << recTrack.vertex().z()
-                    << " " << closestVertex->position().z() << std::endl;
   
+    // Get vertex position and error matrix
     GlobalPoint vertexPosition(closestVertex->position().x(),
                                closestVertex->position().y(),
                                closestVertex->position().z());
 
-/*
-    GlobalError vertexError(closestVertex->covariance(0,0),
-                            closestVertex->covariance(1,0),
-                            closestVertex->covariance(1,1),
-                            closestVertex->covariance(2,0),
-                            closestVertex->covariance(2,1),
-                            closestVertex->covariance(2,2));
-*/
-    GlobalError vertexError(1e-6,0.,1e-6, 0.,0.,1e-6);
+    float beamSize = 15e-4; // 15 um
+    GlobalError vertexError(beamSize*beamSize, 0,
+                            beamSize*beamSize, 0,
+                            0,closestVertex->covariance(2,2));
 
-
+    // Refit track with vertex constraint
     SingleTrackVertexConstraint stvc;
     pair<TransientTrack, float> result =
       stvc.constrain(theTransientTrack, vertexPosition, vertexError);
 
-/*
-    cerr << " refit: " << recTrack.momentum()
-             << " -> " << result.first.impactPointTSCP().momentum() << endl
-        << "       : " << vertexPosition
-             << " -> " << result.first.impactPointTSCP().position() << endl;
-*/
-
-    return result.first.impactPointTSCP().pt();
+    return pair<float,float>(result.first.impactPointTSCP().pt(), dzmin);
   }
   else
-    return recTrack.pt();
+    return pair<float,float>(recTrack.pt(), -9999);
 }
+
 /*****************************************************************************/
 void LowPtTrackAnalyzer::checkRecTracks
   (edm::Handle<reco::TrackCollection>& recCollection,
@@ -388,19 +397,17 @@ void LowPtTrackAnalyzer::checkRecTracks
     vector<float> result;
 
     // rec
-    result.push_back(recTrack->charge());
-    result.push_back(recTrack->eta());
-    result.push_back(recTrack->pt());
-
-    result.push_back(refitWithVertex(*recTrack,vertices)); // ptv
-
-    result.push_back(recTrack->d0());
+    result.push_back(recTrack->charge());                         // qr
+    result.push_back(recTrack->eta());                            // etar
+    result.push_back(recTrack->pt());                             // ptr
+    result.push_back(refitWithVertex(*recTrack,vertices).first);  // ptv
+    result.push_back(refitWithVertex(*recTrack,vertices).second); // dzv
+    result.push_back(recTrack->d0());                             // d0r
 
     // sim 
     TrackingParticleRef matchedSimTrack;
-    bool match = false;
-
     int nSim = 0;
+
     try
     {
       vector<pair<TrackingParticleRef, double> > simTracks = p[recTrack];
@@ -411,19 +418,17 @@ void LowPtTrackAnalyzer::checkRecTracks
         TrackingParticleRef simTrack = it->first;
         float fraction = it->second;
 
-        // If all hits are shared 
-        if(fraction == 1.)
-        { matchedSimTrack = simTrack; match = true; nSim = 1 ; break; }
-
-        // If some, but not all hits are shared, increase nsim
-        if(fraction > 0. && fraction < 1.) nSim++;
+        // If more than hits are shared, hopefully only once
+        if(fraction > 0.5)
+        { matchedSimTrack = simTrack; nSim++; }
       }
     }
     catch (cms::Exception& event)
     { }
-    result.push_back(nSim);
 
-    if(match)
+    result.push_back(nSim); // nsim
+
+    if(nSim > 0)
     {
       int parentId;
   
@@ -435,11 +440,19 @@ void LowPtTrackAnalyzer::checkRecTracks
       }
       else parentId = 0;
 
-      result.push_back(matchedSimTrack->pdgId());
-      result.push_back(parentId);
-      result.push_back(matchedSimTrack->eta());
-      result.push_back(matchedSimTrack->pt());
-      result.push_back(matchedSimTrack->vertex().Rho());
+      result.push_back(matchedSimTrack->pdgId());         // ids
+      result.push_back(parentId);                         // parids
+      result.push_back(matchedSimTrack->eta());           // etas
+      result.push_back(matchedSimTrack->pt());            // pts
+      result.push_back(matchedSimTrack->vertex().Rho());  // rhos
+    }
+    else 
+    {
+      result.push_back(-9999);
+      result.push_back(-9999);
+      result.push_back(-9999);
+      result.push_back(-9999);
+      result.push_back(-9999);
     }
 
     // fill
@@ -456,8 +469,8 @@ void LowPtTrackAnalyzer::analyze
   ev.getByType(simCollection);
 
   // Get reconstructed
-  edm::Handle<reco::TrackCollection> recCollection;
-  ev.getByLabel("ctfTripletTracks",  recCollection);
+  edm::Handle<reco::TrackCollection>  recCollection;
+  ev.getByLabel(trackCollectionLabel, recCollection);
 
   // Get vertices
   edm::Handle<reco::VertexCollection> vertexCollection;
