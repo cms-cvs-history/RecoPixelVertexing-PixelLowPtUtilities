@@ -41,6 +41,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
+/*
 class TransientTrackFromFTSFactory {
  public:
 
@@ -48,6 +49,7 @@ class TransientTrackFromFTSFactory {
     reco::TransientTrack build (const FreeTrajectoryState & fts,
         const edm::ESHandle<GlobalTrackingGeometry>& trackingGeometry);
 };
+*/
 
 #include "RecoVertex/KalmanVertexFit/interface/SingleTrackVertexConstraint.h"
 
@@ -138,7 +140,7 @@ void LowPtTrackAnalyzer::beginJob(const edm::EventSetup& es)
   trackSim = new TNtuple("trackSim","trackSim",
     "ids:etas:pts:rhos:nhits:nrec:qr:etar:ptr:d0r");
   trackRec = new TNtuple("trackRec","trackRec",
-     "qr:etar:ptr:ptv:dzv,d0r:nsim:ids:parids:etas:pts:rhos");
+     "qr:etar:ptr:chir:ptv:chiv:nhitr:d0r:nsim:ids:parids:etas:pts:rhos");
 }
 
 /*****************************************************************************/
@@ -377,7 +379,8 @@ pair<float,float> LowPtTrackAnalyzer::refitWithVertex
     pair<TransientTrack, float> result =
       stvc.constrain(theTransientTrack, vertexPosition, vertexError);
 
-    return pair<float,float>(result.first.impactPointTSCP().pt(), dzmin);
+    return pair<float,float>(result.first.impactPointTSCP().pt(),
+                             result.second);
   }
   else
     return pair<float,float>(recTrack.pt(), -9999);
@@ -400,8 +403,10 @@ void LowPtTrackAnalyzer::checkRecTracks
     result.push_back(recTrack->charge());                         // qr
     result.push_back(recTrack->eta());                            // etar
     result.push_back(recTrack->pt());                             // ptr
+    result.push_back(recTrack->chi2());                           // chir
     result.push_back(refitWithVertex(*recTrack,vertices).first);  // ptv
-    result.push_back(refitWithVertex(*recTrack,vertices).second); // dzv
+    result.push_back(refitWithVertex(*recTrack,vertices).second); // chiv
+    result.push_back(recTrack->recHitsSize());                    // nhitr
     result.push_back(recTrack->d0());                             // d0r
 
     // sim 
@@ -469,8 +474,10 @@ void LowPtTrackAnalyzer::analyze
   ev.getByType(simCollection);
 
   // Get reconstructed
+  cerr << "[LowPtTrackAnalyzer] get TrackCollection";
   edm::Handle<reco::TrackCollection>  recCollection;
   ev.getByLabel(trackCollectionLabel, recCollection);
+  cerr << " [" << recCollection.product()->size() << "]" << endl;
 
   // Get vertices
   edm::Handle<reco::VertexCollection> vertexCollection;
@@ -490,7 +497,7 @@ void LowPtTrackAnalyzer::analyze
   // Plot event
   if(plotEvent)
   {
-    EventPlotter theEventPlotter(es);
+    EventPlotter theEventPlotter(es, trackCollectionLabel);
     theEventPlotter.printEvent(ev);
 
     if(zipFiles)

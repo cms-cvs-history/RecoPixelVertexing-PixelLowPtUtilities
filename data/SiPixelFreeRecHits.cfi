@@ -1,6 +1,6 @@
-module siPixelFreeRecHits = SiPixelRecHitRemover
+module pixelFreeHits = SiPixelRecHitRemover
 {
   string HitCollectionLabel = "siPixelRecHits"
-  vstring removeHitsList = { "pixelTracksWithVertices" }
+  vstring removeHitsList = { "pixelPrimTracks" }
 }
 

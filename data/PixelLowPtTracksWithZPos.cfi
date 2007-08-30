@@ -15,7 +15,6 @@ module pixelLowPtTracksWithZPos = PixelTrackProducerWithZPos
       double originZPos       = 0.0   // cm
       bool precise          = false
       bool useFoundVertices = false
-      bool useFirstVertex   = true
     }
   }
 
@@ -27,7 +26,8 @@ module pixelLowPtTracksWithZPos = PixelTrackProducerWithZPos
     PSet GeneratorPSet =
     {
       string ComponentName = "PixelTripletLowPtGenerator"
-      bool useClusterShape = true
+      bool useClusterShape  = true
+      bool useCleanerMerger = true
     }
   }
 
@@ -40,18 +40,10 @@ module pixelLowPtTracksWithZPos = PixelTrackProducerWithZPos
 
   // Filter
   PSet FilterPSet =
-  {
-    string ComponentName = "ClusterShapeTrackFilter"
-  }
+  { string ComponentName = "ClusterShapeTrackFilter" }
 
   // Cleaner
   PSet CleanerPSet =
-  {
-    string ComponentName = "LowPtPixelTrackCleanerBySharedHits"
-  }
-
-  // Hit removal
-  bool removeHitsOnTracks = false
-  vstring removeHitsList = { }
+  { string ComponentName = "LowPtPixelTrackCleanerBySharedHits" }
 }
 

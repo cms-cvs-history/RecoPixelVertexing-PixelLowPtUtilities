@@ -34,5 +34,9 @@
 <use name=geant4>
 
 <library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
-<flags EDM_PLUGIN=1>
+ <flags EDM_PLUGIN=1>
+</library>
+
+<library file="ChargedMultiplicityAnalyzer.cc" name="ChargedMultiplicityAnalyzer">
+ <flags EDM_PLUGIN=1>
 </library>
