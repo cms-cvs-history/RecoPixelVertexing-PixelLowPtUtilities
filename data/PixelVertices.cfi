@@ -1,0 +1,5 @@
+module pixelVertices = PixelVertexProducerMedian
+{
+  string TrackCollection = "pixelTracks"
+  double PtMin = 1.0
+}
