@@ -7,7 +7,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHitCollection.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2DCollection.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripRecHit2DCollection.h"
-
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
