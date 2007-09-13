@@ -28,6 +28,7 @@
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 
