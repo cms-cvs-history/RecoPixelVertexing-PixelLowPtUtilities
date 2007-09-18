@@ -1,6 +1,7 @@
 #include "RecoPixelVertexing/PixelLowPtUtilities/interface/RecHitRemover.h"
 
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 /*****************************************************************************/
 class HitComparator
