@@ -196,7 +196,7 @@ void ChargedMultiplicityAnalyzer::analyze
           (&(pixelDet->specificTopology()));
   
       // Take all hits
-      if((*id).subdetId() == PixelSubdetector::PixelBarrel)
+      if((*id).subdetId() == int(PixelSubdetector::PixelBarrel))
       { 
         PXBDetId pid(*id);
   

@@ -1,6 +1,0 @@
-untracked vstring fileNames =
-{
- 'file:/afs/kfki.hu/scratch/sikler/cmssw/aachydjet_120/recHitsWithTrackingParticles_1.root',
-#'file:/afs/kfki.hu/scratch/sikler/cmssw/aachydjet_120/recHitsWithTrackingParticles_7.root',
- 'file:/afs/kfki.hu/scratch/sikler/cmssw/aachydjet_120/recHitsWithTrackingParticles_9.root'
-}
