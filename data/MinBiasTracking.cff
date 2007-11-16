@@ -1,0 +1,26 @@
+  ############################################################################
+  # Fake configuration
+  include "CalibTracker/Configuration/data/SiStrip_FakeLorentzAngle.cff"
+
+  ############################################################################
+  # Collections
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasPixelTracks.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasPixelSeeds.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasGlobalTracks.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasVZeros.cff"
+
+  #############################################################################
+  # Sequence
+  sequence minBiasTracking =
+  {
+    pixel3ProtoTracks,
+    #
+    pixelVertices,     pixel3PrimTracks,
+    pixelFreeSecoHits, pixelSecoTracks,
+    #
+    primSeeds, primTrackCandidates, globalPrimTracks,
+    secoSeeds, secoTrackCandidates, globalSecoTracks,
+    #
+    pixelVZeros
+  }
+

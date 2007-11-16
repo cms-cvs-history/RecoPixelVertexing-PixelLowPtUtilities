@@ -1,0 +1,36 @@
+  #############################################################################
+  # Pixel tracks
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cff"
+
+  # Pixel triplet tracks
+  module  pixel3ProtoTracks = pixelLowPtTracksWithZPos from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cfi"
+  replace pixel3ProtoTracks.passLabel = "Pixel triplet tracks for vertexing" 
+
+  # Pixel triplet vertices
+  include "RecoPixelVertexing/PixelVertexFinding/data/PixelVertexes.cff"
+  replace pixelVertices.TrackCollection = pixel3ProtoTracks
+  replace pixelVertices.ZSeparation = 0.3 // [cm]
+  replace pixelVertices.NTrkMin     = 3 
+  replace pixelVertices.PtMin       = 0.15 // [GeV/c]
+
+  # Pixel triplet tracks with vertices
+  module  pixel3PrimTracks = pixelLowPtTracksWithZPos from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cfi"
+  replace pixel3PrimTracks.passLabel = "Pixel triplet primary tracks with vertex constraint" 
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.useFoundVertices = true
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.originHalfLength = 0.2 // [cm]
+
+  # Hit remover
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/SiPixelFreeRecHits.cff"
+
+  # Pixel triplet tracks, secondaries  
+  module pixelFreeSecoHits = pixelFreeHits from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/SiPixelFreeRecHits.cfi"
+  replace pixelFreeSecoHits.removeHitsList = { "pixel3PrimTracks" }
+
+  module  pixelSecoTracks = pixelLowPtTracksWithZPos from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cfi"
+  replace pixelSecoTracks.passLabel = "Pixel triplet secondary tracks" 
+  replace pixelSecoTracks.RegionFactoryPSet.RegionPSet.originRadius = 3.5 // [cm]
+  replace pixelSecoTracks.OrderedHitsFactoryPSet.SeedingLayers = "PixelLayerTripletsModified"

@@ -15,6 +15,7 @@ module pixelLowPtTracksWithZPos = PixelTrackProducerWithZPos
       double originZPos       = 0.0   // cm
       bool precise          = false
       bool useFoundVertices = false
+      bool useChi2Cut       = false
     }
   }
 
@@ -40,10 +41,14 @@ module pixelLowPtTracksWithZPos = PixelTrackProducerWithZPos
 
   // Filter
   PSet FilterPSet =
-  { string ComponentName = "ClusterShapeTrackFilter" }
+  { 
+    string ComponentName = "ClusterShapeTrackFilter"
+  }
 
   // Cleaner
   PSet CleanerPSet =
-  { string ComponentName = "LowPtPixelTrackCleanerBySharedHits" }
+  { 
+    string ComponentName = "LowPtPixelTrackCleanerBySharedHits"
+  }
 }
 

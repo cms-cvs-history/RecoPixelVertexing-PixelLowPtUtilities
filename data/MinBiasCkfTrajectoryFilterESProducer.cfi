@@ -1,0 +1,24 @@
+# Base
+include "TrackingTools/TrajectoryFiltering/data/TrajectoryFilterESProducer.cff"
+replace trajectoryFilterESProducer.filterPset.minimumNumberOfHits = 3 
+replace trajectoryFilterESProducer.filterPset.minPt               = 0.075
+
+# ClusterShape
+es_module clusterShapeTrajectoryFilterESProducer =
+          ClusterShapeTrajectoryFilterESProducer
+{
+  string ComponentName = "clusterShapeTrajectoryFilter"
+  PSet filterPset =
+  {
+    string ComponentType = "clusterShapeTrajectoryFilter"
+  }
+}
+
+# Composite
+es_module minBiasTrajectoryFilterESProducer =
+        CompositeTrajectoryFilterESProducer
+{
+  string ComponentName = "MinBiasCkfTrajectoryFilter"
+  vstring filterNames =
+  { "ckfBaseTrajectoryFilter", "clusterShapeTrajectoryFilter" }
+} 

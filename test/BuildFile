@@ -33,10 +33,28 @@
 <use name=clhep>
 <use name=geant4>
 
+<library file="ClusterShapeExtractor.cc" name="ClusterShapeExtractor">
+ <use name=SimTracker/TrackerHitAssociation>
+ <flags EDM_PLUGIN=1>
+</library>
+
 <library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
+ <flags EDM_PLUGIN=1>
+</library>
+
+<library file="EventPlotter.cc" name="EventPlotter">
  <flags EDM_PLUGIN=1>
 </library>
 
 <library file="ChargedMultiplicityAnalyzer.cc" name="ChargedMultiplicityAnalyzer">
  <flags EDM_PLUGIN=1>
 </library>
+
+<library file="VertexAnalyzer.cc" name="VertexAnalyzer">
+ <use name=SimDataFormats/TrackingAnalysis>
+ <use name=SimDataFormats/Track>
+ <use name=SimDataFormats/Vertex>
+ <use name=SimDataFormats/HepMCProduct>
+ <flags EDM_PLUGIN=1>
+</library>
+

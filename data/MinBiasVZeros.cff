@@ -1,0 +1,5 @@
+  #############################################################################
+  # V0 reconstruction
+  include "RecoVZero/VZeroFinding/data/VZeros.cff"
+  replace pixelVZeros.minImpactPositiveDaughter = 0.2 // [cm]
+  replace pixelVZeros.minImpactNegativeDaughter = 0.2 // [cm]

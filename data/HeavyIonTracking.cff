@@ -1,0 +1,112 @@
+  #############################################################################
+  # Source
+  source = PoolSource
+  { 
+    untracked vstring fileNames = { 'somewhere' }
+    untracked uint32 skipEvents = 0
+  }
+
+  ############################################################################
+  # For digis only
+  include "Configuration/ReleaseValidation/data/Services.cff"
+
+  include "CalibTracker/Configuration/data/SiStrip_FakeLorentzAngle.cff"
+  include "CalibTracker/Configuration/data/SiStrip_FakeGain.cff"
+  include "CalibTracker/Configuration/data/SiStrip_FakeNoise.cff"
+  include "CalibTracker/Configuration/data/SiStrip_FakePedestals.cff"
+
+  include "RecoLocalTracker/Configuration/data/RecoLocalTracker.cff"
+
+  #############################################################################
+  # Pixel tracks
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cff"
+
+  # Pixel triplet tracks
+  module  pixel3ProtoTracks = pixelLowPtTracksWithZPos from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cfi"
+  replace pixel3ProtoTracks.passLabel = "Pixel triplet tracks for vertexing" 
+  replace pixel3ProtoTracks.RegionFactoryPSet.RegionPSet.ptMin        = 0.2
+  replace pixel3ProtoTracks.RegionFactoryPSet.RegionPSet.originRadius = 0.1
+
+  # Pixel triplet vertices
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/PixelVertices.cfi"
+  replace pixelVertices.TrackCollection = "pixel3ProtoTracks"
+
+  # Pixel triplet tracks with vertices
+  module  pixel3PrimTracks = pixelLowPtTracksWithZPos from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelLowPtTracksWithZPos.cfi"
+  replace pixel3PrimTracks.passLabel = "Pixel triplet primary tracks with vertex constraint" 
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.ptMin        = 0.2
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.originRadius = 0.1
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.useFoundVertices = true
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.useChi2Cut       = true
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.originHalfLength = 0.1 // [cm]
+
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/PixelTrackSeeds.cff"
+
+  #############################################################################
+  # Pixel seeds
+  module primSeeds = pixelTrackSeeds from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelTrackSeeds.cfi" 
+  replace primSeeds.tripletList = { "pixel3PrimTracks" }
+
+  #############################################################################
+  # Candidate maker, final fit
+  include "RecoTracker/CkfPattern/data/CkfTrackCandidates.cff"
+  include "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cff"
+
+  replace CkfTrajectoryBuilder.ptCut                = 0.2
+  replace CkfTrajectoryBuilder.maxCand              = 5
+  replace CkfTrajectoryBuilder.maxLostHit           = 1
+  replace CkfTrajectoryBuilder.maxConsecLostHit     = 1
+  replace CkfTrajectoryBuilder.minimumNumberOfHits  = 6
+  replace CkfTrajectoryBuilder.intermediateCleaning = false
+  replace CkfTrajectoryBuilder.alwaysUseInvalidHits = false
+
+  replace CkfTrajectoryBuilder.clusterShapeMode = 1
+
+  replace MaterialPropagator.Mass         = 0.139
+  replace OppositeMaterialPropagator.Mass = 0.139
+  
+  # Primaries
+  module  primTrackCandidates = ckfTrackCandidates from
+    "RecoTracker/CkfPattern/data/CkfTrackCandidates.cfi"
+  replace primTrackCandidates.SeedProducer = "primSeeds"
+  replace primTrackCandidates.RedundantSeedCleaner = "none"
+  
+  module  globalPrimTracks = ctfWithMaterialTracks from
+    "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cfi"
+  replace globalPrimTracks.src = "primTrackCandidates"
+  replace globalPrimTracks.TrajectoryInEvent = true
+
+  #############################################################################
+  # Analyzers
+  include "SimTracker/TrackAssociation/data/TrackAssociatorByHits.cfi"
+  replace TrackAssociatorByHitsESProducer.MinHitFraction = 0.0
+  es_module = GlobalTrackingGeometryESProducer { }
+  es_module = TransientTrackBuilderESProducer
+  {
+    string ComponentName = "TransientTrackBuilder"
+  }
+
+  module testGlobalTracks = LowPtTrackAnalyzer
+  {
+    vstring trackCollection = { "globalPrimTracks" }
+    string resultFile      = "resultGlobalTracks.root"
+    bool plotEvent = false
+    bool zipFiles  = false
+  }
+
+  #############################################################################
+  # Sequence
+  sequence heavyIonTracking =
+  {
+    trackerlocalreco,
+    pixel3ProtoTracks,
+    #
+    pixelVertices,
+    pixel3PrimTracks,
+    #
+    primSeeds, primTrackCandidates, globalPrimTracks
+  }
+

@@ -1,0 +1,10 @@
+  #############################################################################
+  # Pixel seeds
+  module primSeeds = pixelTrackSeeds from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelTrackSeeds.cfi" 
+  replace primSeeds.tripletList = { "pixel3PrimTracks" }
+
+  # Secondary seeds
+  module secoSeeds = pixelTrackSeeds from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/PixelTrackSeeds.cfi" 
+  replace secoSeeds.tripletList = { "pixelSecoTracks" }

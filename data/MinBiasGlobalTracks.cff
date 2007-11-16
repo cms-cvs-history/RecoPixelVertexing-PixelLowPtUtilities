@@ -1,0 +1,40 @@
+  #############################################################################
+  # Global tracks
+  include "RecoTracker/CkfPattern/data/CkfTrackCandidates.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasCkfTrajectoryFilterESProducer.cfi"
+
+  replace GroupedCkfTrajectoryBuilder.maxCand              = 5
+  replace GroupedCkfTrajectoryBuilder.intermediateCleaning = false
+  replace GroupedCkfTrajectoryBuilder.alwaysUseInvalidHits = false
+  replace GroupedCkfTrajectoryBuilder.trajectoryFilterName = "MinBiasCkfTrajectoryFilter"
+
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/TrajectoryCleanerBySharedSeeds.cfi"
+
+  # Final fit
+  include "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cff"
+  replace MaterialPropagator.Mass         = 0.139
+  replace OppositeMaterialPropagator.Mass = 0.139
+
+  # Primaries
+  module  primTrackCandidates = ckfTrackCandidates from
+    "RecoTracker/CkfPattern/data/CkfTrackCandidates.cfi"
+  replace primTrackCandidates.TrajectoryCleaner = "TrajectoryCleanerBySharedSeeds"
+  replace primTrackCandidates.SeedProducer = "primSeeds"
+  replace primTrackCandidates.RedundantSeedCleaner = "none"
+  
+  module  globalPrimTracks = ctfWithMaterialTracks from
+    "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cfi"
+  replace globalPrimTracks.src = "primTrackCandidates"
+  replace globalPrimTracks.TrajectoryInEvent = true
+
+  # Secondaries
+  module  secoTrackCandidates = ckfTrackCandidates from
+    "RecoTracker/CkfPattern/data/CkfTrackCandidates.cfi"
+  replace secoTrackCandidates.TrajectoryCleaner = "TrajectoryCleanerBySharedSeeds"
+  replace secoTrackCandidates.SeedProducer = "secoSeeds"
+  replace secoTrackCandidates.RedundantSeedCleaner = "none"
+
+  module  globalSecoTracks = ctfWithMaterialTracks from
+    "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cfi"
+  replace globalSecoTracks.src = "secoTrackCandidates"
+  replace globalSecoTracks.TrajectoryInEvent = true

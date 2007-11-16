@@ -1,0 +1,34 @@
+  #############################################################################
+  # Analyzers
+  include "SimTracker/TrackAssociation/data/TrackAssociatorByHits.cfi"
+  replace TrackAssociatorByHitsESProducer.MinHitCut = 0.0
+
+  es_module = GlobalTrackingGeometryESProducer { }
+  es_module = TransientTrackBuilderESProducer
+  { string ComponentName = "TransientTrackBuilder" }
+
+  module plotEvent = EventPlotter
+  {
+    vstring trackCollection = { "globalPrimTracks", "globalSecoTracks" }
+    bool zipFiles = false
+  }
+
+  module testPixel3Tracks = LowPtTrackAnalyzer
+  {
+    vstring trackCollection = { "pixel3PrimTracks" }
+    string resultFile      = "resultPixel3Tracks.root"
+    bool plotEvent = false
+    bool zipFiles  = false
+  }
+
+  module testGlobalTracks = LowPtTrackAnalyzer
+  {
+    vstring trackCollection = { "globalPrimTracks" }
+    string resultFile      = "resultGlobalTracks.root"
+    bool plotEvent = false
+    bool zipFiles  = false
+  }
+
+  module multiplicity = ChargedMultiplicityAnalyzer
+  {
+  }

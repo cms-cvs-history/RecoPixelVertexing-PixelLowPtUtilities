@@ -1,4 +1,5 @@
 module pixelTrackSeeds = PixelTrackSeedProducer
 {
   vstring tripletList = { }
+  string TTRHBuilder        =  "WithTrackAngle"
 }
