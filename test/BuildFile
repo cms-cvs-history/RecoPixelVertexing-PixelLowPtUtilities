@@ -42,6 +42,10 @@
  <flags EDM_PLUGIN=1>
 </library>
 
+<library file="EnergyLossEstimator.cc" name="EnergyLossEstimator">
+ <flags EDM_PLUGIN=1>
+</library>
+
 <library file="EventPlotter.cc" name="EventPlotter">
  <flags EDM_PLUGIN=1>
 </library>
