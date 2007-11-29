@@ -1,21 +1,6 @@
-  #############################################################################
-  # Source
-  source = PoolSource
-  { 
-    untracked vstring fileNames = { 'somewhere' }
-    untracked uint32 skipEvents = 0
-  }
-
   ############################################################################
-  # For digis only
-  include "Configuration/ReleaseValidation/data/Services.cff"
-
+  # Fake configuration
   include "CalibTracker/Configuration/data/SiStrip_FakeLorentzAngle.cff"
-  include "CalibTracker/Configuration/data/SiStrip_FakeGain.cff"
-  include "CalibTracker/Configuration/data/SiStrip_FakeNoise.cff"
-  include "CalibTracker/Configuration/data/SiStrip_FakePedestals.cff"
-
-  include "RecoLocalTracker/Configuration/data/RecoLocalTracker.cff"
 
   #############################################################################
   # Pixel tracks
@@ -38,11 +23,7 @@
   replace pixel3PrimTracks.passLabel = "Pixel triplet primary tracks with vertex constraint" 
   replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.ptMin        = 0.2
   replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.originRadius = 0.1
-  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.useFoundVertices = true
-  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.useChi2Cut       = true
-  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.originHalfLength = 0.1 // [cm]
-
-  include "RecoPixelVertexing/PixelLowPtUtilities/data/PixelTrackSeeds.cff"
+  replace pixel3PrimTracks.RegionFactoryPSet.RegionPSet.originHalfLength = 0.1
 
   #############################################################################
   # Pixel seeds
@@ -51,26 +32,55 @@
   replace primSeeds.tripletList = { "pixel3PrimTracks" }
 
   #############################################################################
-  # Candidate maker, final fit
+  # Global tracks
   include "RecoTracker/CkfPattern/data/CkfTrackCandidates.cff"
+
+  # Filter
+  include "TrackingTools/TrajectoryFiltering/data/TrajectoryFilterESProducer.cff"
+  es_module ckfBaseTrajectoryFilterForMinBias = trajectoryFilterESProducer 
+    from "TrackingTools/TrajectoryFiltering/data/TrajectoryFilterESProducer.cfi"
+
+  replace ckfBaseTrajectoryFilterForMinBias.ComponentName = 
+    "ckfBaseTrajectoryFilterForMinBias"
+  replace ckfBaseTrajectoryFilterForMinBias.filterPset.minimumNumberOfHits = 6 
+  replace ckfBaseTrajectoryFilterForMinBias.filterPset.minPt               = 0.2
+
+  # ClusterShape
+  es_module clusterShapeTrajectoryFilterESProducer =
+            ClusterShapeTrajectoryFilterESProducer
+  {
+      string ComponentName = "clusterShapeTrajectoryFilter"
+    PSet filterPset =
+    {
+      string ComponentType = "clusterShapeTrajectoryFilter"
+    }
+  }
+
+  # Composite
+  es_module minBiasTrajectoryFilterESProducer =
+          CompositeTrajectoryFilterESProducer
+  {
+    string ComponentName = "MinBiasCkfTrajectoryFilter"
+    vstring filterNames =
+    { "ckfBaseTrajectoryFilterForMinBias", "clusterShapeTrajectoryFilter" }
+  } 
+
+  replace GroupedCkfTrajectoryBuilder.maxCand              = 5
+  replace GroupedCkfTrajectoryBuilder.intermediateCleaning = false
+  replace GroupedCkfTrajectoryBuilder.alwaysUseInvalidHits = false
+  replace GroupedCkfTrajectoryBuilder.trajectoryFilterName = "MinBiasCkfTrajectoryFilter"
+
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/TrajectoryCleanerBySharedSeeds.cfi"
+
+  # Final fit
   include "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cff"
-
-  replace CkfTrajectoryBuilder.ptCut                = 0.2
-  replace CkfTrajectoryBuilder.maxCand              = 5
-  replace CkfTrajectoryBuilder.maxLostHit           = 1
-  replace CkfTrajectoryBuilder.maxConsecLostHit     = 1
-  replace CkfTrajectoryBuilder.minimumNumberOfHits  = 6
-  replace CkfTrajectoryBuilder.intermediateCleaning = false
-  replace CkfTrajectoryBuilder.alwaysUseInvalidHits = false
-
-  replace CkfTrajectoryBuilder.clusterShapeMode = 1
-
   replace MaterialPropagator.Mass         = 0.139
   replace OppositeMaterialPropagator.Mass = 0.139
-  
+
   # Primaries
   module  primTrackCandidates = ckfTrackCandidates from
     "RecoTracker/CkfPattern/data/CkfTrackCandidates.cfi"
+  replace primTrackCandidates.TrajectoryCleaner = "TrajectoryCleanerBySharedSeeds"
   replace primTrackCandidates.SeedProducer = "primSeeds"
   replace primTrackCandidates.RedundantSeedCleaner = "none"
   
@@ -80,32 +90,12 @@
   replace globalPrimTracks.TrajectoryInEvent = true
 
   #############################################################################
-  # Analyzers
-  include "SimTracker/TrackAssociation/data/TrackAssociatorByHits.cfi"
-  replace TrackAssociatorByHitsESProducer.MinHitFraction = 0.0
-  es_module = GlobalTrackingGeometryESProducer { }
-  es_module = TransientTrackBuilderESProducer
-  {
-    string ComponentName = "TransientTrackBuilder"
-  }
-
-  module testGlobalTracks = LowPtTrackAnalyzer
-  {
-    vstring trackCollection = { "globalPrimTracks" }
-    string resultFile      = "resultGlobalTracks.root"
-    bool plotEvent = false
-    bool zipFiles  = false
-  }
-
-  #############################################################################
   # Sequence
   sequence heavyIonTracking =
   {
-    trackerlocalreco,
     pixel3ProtoTracks,
     #
-    pixelVertices,
-    pixel3PrimTracks,
+    pixelVertices,    pixel3PrimTracks,
     #
     primSeeds, primTrackCandidates, globalPrimTracks
   }
