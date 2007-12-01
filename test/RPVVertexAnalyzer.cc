@@ -20,11 +20,11 @@
 using namespace std;
 
 /*****************************************************************************/
-class VertexAnalyzer : public edm::EDAnalyzer
+class RPVVertexAnalyzer : public edm::EDAnalyzer
 {
  public:
-   explicit VertexAnalyzer(const edm::ParameterSet& pset);
-   ~VertexAnalyzer();
+   explicit RPVVertexAnalyzer(const edm::ParameterSet& pset);
+   ~RPVVertexAnalyzer();
    virtual void beginJob(const edm::EventSetup& es);
    virtual void analyze(const edm::Event& ev, const edm::EventSetup& es);
    virtual void endJob();
@@ -39,7 +39,7 @@ class VertexAnalyzer : public edm::EDAnalyzer
 };
 
 /*****************************************************************************/
-VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& pset)
+RPVVertexAnalyzer::RPVVertexAnalyzer(const edm::ParameterSet& pset)
 {
   NEvents     = pset.getParameter<int>("NEvents");
   NTrkMin     = pset.getParameter<int>("NTrkMin");
@@ -47,12 +47,12 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& pset)
 }
 
 /*****************************************************************************/
-VertexAnalyzer::~VertexAnalyzer()
+RPVVertexAnalyzer::~RPVVertexAnalyzer()
 {
 }
 
 /*****************************************************************************/
-void VertexAnalyzer::beginJob(const edm::EventSetup& es)
+void RPVVertexAnalyzer::beginJob(const edm::EventSetup& es)
 {
   // Root
   char fileName[256];
@@ -65,7 +65,7 @@ void VertexAnalyzer::beginJob(const edm::EventSetup& es)
 }
 
 /*****************************************************************************/
-void VertexAnalyzer::endJob()
+void RPVVertexAnalyzer::endJob()
 {
   resultFile->cd();
   ntuple->Write();
@@ -73,7 +73,7 @@ void VertexAnalyzer::endJob()
 }
 
 /*****************************************************************************/
-void VertexAnalyzer::analyze
+void RPVVertexAnalyzer::analyze
   (const edm::Event& ev, const edm::EventSetup& es)
 {
   // Get reconstructed
@@ -94,4 +94,4 @@ void VertexAnalyzer::analyze
   ntuple->Fill(&result[0]);
 }
 
-DEFINE_FWK_MODULE(VertexAnalyzer);
+DEFINE_FWK_MODULE(RPVVertexAnalyzer);
