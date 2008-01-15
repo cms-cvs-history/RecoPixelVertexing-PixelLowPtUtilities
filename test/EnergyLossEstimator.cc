@@ -102,7 +102,7 @@ void EnergyLossEstimator::analyze
   ev.getByType(simCollection);
 
   // Get reconstructed
-  edm::Handle<reco::TrackCollection>  recCollection;
+  edm::Handle<edm::View<reco::Track> >  recCollection;
   ev.getByLabel("globalPrimTracks", recCollection);
 
   // Associatiors
@@ -140,7 +140,7 @@ void EnergyLossEstimator::analyze
     TrackingParticleRef matchedSimTrack;
     int nSim = 0;
 
-    reco::TrackRef recTrack(recCollection, i);
+    edm::RefToBase<reco::Track> recTrack(recCollection, i);
     vector<pair<TrackingParticleRef, double> > simTracks = recoToSim[recTrack];
     for(vector<pair<TrackingParticleRef, double> >::const_iterator
             it = simTracks.begin(); it != simTracks.end(); ++it)

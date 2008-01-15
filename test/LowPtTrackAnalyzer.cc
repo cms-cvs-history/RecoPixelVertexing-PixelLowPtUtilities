@@ -79,8 +79,8 @@ class LowPtTrackAnalyzer : public edm::EDAnalyzer
 
    pair<float,float> refitWithVertex(const reco::Track & recTrack,
                                      const reco::VertexCollection* vertices);
-   int getParticleId(reco::TrackRef& recTrack, int & ptype);
-   void checkRecTracks(edm::Handle<reco::TrackCollection>& recCollection,
+   int getParticleId(edm::RefToBase<reco::Track>& recTrack, int & ptype);
+   void checkRecTracks(edm::Handle<edm::View<reco::Track> >& recCollection,
                        const reco::VertexCollection* vertices,
                        reco::RecoToSimCollection& p);
 
@@ -315,17 +315,17 @@ void LowPtTrackAnalyzer::checkSimTracks
     result.push_back(getNumberOfPixelHits(*simTrack)); // nhits >= 3 accepted
 
     // rec
-    reco::TrackRef matchedRecTrack;
+    edm::RefToBase<reco::Track> matchedRecTrack;
     int nRec = 0;
 
     try
     {
-      vector<pair<reco::TrackRef, double> > recTracks = q[simTrack];
+      vector<pair<edm::RefToBase<reco::Track>, double> > recTracks = q[simTrack];
 
-      for(vector<pair<reco::TrackRef,double> >::const_iterator
+      for(vector<pair<edm::RefToBase<reco::Track>,double> >::const_iterator
             it = recTracks.begin(); it != recTracks.end(); ++it)
       {
-        reco::TrackRef recTrack = it->first;
+        edm::RefToBase<reco::Track> recTrack = it->first;
         int nShared =
          (int)(it->second * getNumberOfSimHits(*simTrack) + 0.5);
 
@@ -408,7 +408,7 @@ pair<float,float> LowPtTrackAnalyzer::refitWithVertex
 }
 
 /*****************************************************************************/
-int LowPtTrackAnalyzer::getParticleId(reco::TrackRef& recTrack, int & ptype)
+int LowPtTrackAnalyzer::getParticleId(edm::RefToBase<reco::Track>& recTrack, int & ptype)
 {
   int pid = 0;
   ptype = 0;
@@ -434,14 +434,14 @@ int LowPtTrackAnalyzer::getParticleId(reco::TrackRef& recTrack, int & ptype)
 
 /*****************************************************************************/
 void LowPtTrackAnalyzer::checkRecTracks
-  (edm::Handle<reco::TrackCollection>& recCollection,
+  (edm::Handle<edm::View<reco::Track> >& recCollection,
    const reco::VertexCollection* vertices,
    reco::RecoToSimCollection& p)
 {
-  for(reco::TrackCollection::size_type i=0;
+  for(edm::View<reco::Track> ::size_type i=0;
           i < recCollection.product()->size(); ++i)
   {
-    reco::TrackRef recTrack(recCollection, i);
+    edm::RefToBase<reco::Track> recTrack(recCollection, i);
 
     vector<float> result;
 
@@ -552,7 +552,7 @@ void LowPtTrackAnalyzer::analyze
   ev.getByType(simCollection);
 
   // Get reconstructed
-  edm::Handle<reco::TrackCollection>  recCollection;
+  edm::Handle<edm::View<reco::Track> >  recCollection;
   ev.getByLabel(trackCollectionLabels[0], recCollection); // !!
 
   cerr << "[LowPtTrackAnalyzer] recTracks = "

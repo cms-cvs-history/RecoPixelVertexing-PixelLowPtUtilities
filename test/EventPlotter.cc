@@ -575,8 +575,9 @@ void EventPlotter::printVZeros
     // Calculate momentum at dca
     FreeTrajectoryState posTraj = getTrajectory(*(vZero->positiveDaughter()));
     FreeTrajectoryState negTraj = getTrajectory(*(vZero->negativeDaughter()));
+    theApproach.calculate(posTraj,negTraj);
     pair<GlobalTrajectoryParameters, GlobalTrajectoryParameters>
-      gtp = theApproach.trajectoryParameters(posTraj,negTraj);
+      gtp = theApproach.trajectoryParameters();
     pair<GlobalVector,GlobalVector>
       momenta(gtp.first.momentum(), gtp.second.momentum());
 
