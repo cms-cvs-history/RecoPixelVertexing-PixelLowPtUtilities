@@ -37,6 +37,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
+/*
 class TransientTrackFromFTSFactory {
  public:
 
@@ -44,6 +45,7 @@ class TransientTrackFromFTSFactory {
     reco::TransientTrack build (const FreeTrajectoryState & fts,
         const edm::ESHandle<GlobalTrackingGeometry>& trackingGeometry);
 };
+*/
 
 #include "RecoVertex/KalmanVertexFit/interface/SingleTrackVertexConstraint.h"
 
