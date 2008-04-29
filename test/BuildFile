@@ -55,10 +55,6 @@
 </library>
 
 <library file="RPVVertexAnalyzer.cc" name="RPVVertexAnalyzer">
- <use name=SimDataFormats/TrackingAnalysis>
- <use name=SimDataFormats/Track>
- <use name=SimDataFormats/Vertex>
- <use name=SimDataFormats/HepMCProduct>
  <flags EDM_PLUGIN=1>
 </library>
 
