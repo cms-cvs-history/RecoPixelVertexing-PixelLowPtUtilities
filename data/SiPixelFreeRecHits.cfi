@@ -1,6 +1,0 @@
-module pixelFreeHits = SiPixelRecHitRemover
-{
-  string HitCollectionLabel = "siPixelRecHits"
-  vstring removeHitsList = { "" }
-}
-
