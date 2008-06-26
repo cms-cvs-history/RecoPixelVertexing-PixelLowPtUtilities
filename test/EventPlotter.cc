@@ -266,17 +266,19 @@ void EventPlotter::getGlobal
 
 /*****************************************************************************/
 void EventPlotter::printSimTracks
-  (const TrackingParticleCollection* simTracks)
+  (const TrackingParticleCollection* constSimTracks)
 {
   ofstream pixelFile("event/pixelSimHits.m");
   ofstream stripFile("event/stripSimHits.m");
   ofstream trajeFile("event/simTracks.m");
-
-  for(TrackingParticleCollection::const_iterator simTrack = simTracks->begin();
-                                                 simTrack!= simTracks->end();
-                                                 simTrack++)
+  
+  TrackingParticleCollection* simTracks = const_cast<TrackingParticleCollection*>(constSimTracks);
+  
+  for(TrackingParticleCollection::iterator simTrack = simTracks->begin();
+                                           simTrack!= simTracks->end();
+                                           simTrack++)
   {
-    vector<PSimHit> simHits = simTrack->trackPSimHit();
+    vector<PSimHit> simHits = simTrack->trackerPSimHit();
 
     // reorder with help of momentum
     sort(simHits.begin(), simHits.end(), sortByPabs());
