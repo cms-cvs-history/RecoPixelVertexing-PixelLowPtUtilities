@@ -104,7 +104,7 @@ int ChargedMultiplicityAnalyzer::getNumberOfPixelBarrelHits
   // to use trackerPSimHit methods TP cannot be const
   TrackingParticle simTrack = *(const_cast<TrackingParticle*>(&constSimTrack));
   
-  for(std::vector<PSimHit>::iterator simHit = simTrack.trackerPSimHit_begin();
+  for(std::vector<PSimHit>::const_iterator simHit = simTrack.trackerPSimHit_begin();
                                      simHit!= simTrack.trackerPSimHit_end();
                                      simHit++)
   {
