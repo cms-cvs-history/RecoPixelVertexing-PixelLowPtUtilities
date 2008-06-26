@@ -204,16 +204,19 @@ int LowPtTrackAnalyzer::layerFromDetid(const DetId& detId)
 }
 
 /*****************************************************************************/
-int LowPtTrackAnalyzer::getNumberOfSimHits(const TrackingParticle& simTrack)
+int LowPtTrackAnalyzer::getNumberOfSimHits(const TrackingParticle& constSimTrack)
 {
   int oldlay = 0; int newlay = 0;
   int olddet = 0; int newdet = 0;
 
   int nhit = 0;
 
+  // to use trackerPSimHit methods TP cannot be const
+  TrackingParticle simTrack = *(const_cast<TrackingParticle*>(&constSimTrack));
+  
   for(std::vector<PSimHit>::const_iterator
-       simHit = simTrack.pSimHit_begin();
-       simHit!= simTrack.pSimHit_end(); simHit++)
+       simHit = simTrack.trackerPSimHit_begin();
+       simHit!= simTrack.trackerPSimHit_end(); simHit++)
   {
     const DetId detId = DetId(simHit->detUnitId());
     oldlay = newlay; newlay = layerFromDetid(detId);

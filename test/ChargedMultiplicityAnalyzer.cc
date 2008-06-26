@@ -96,14 +96,17 @@ ChargedMultiplicityAnalyzer::~ChargedMultiplicityAnalyzer()
 
 /*****************************************************************************/
 int ChargedMultiplicityAnalyzer::getNumberOfPixelBarrelHits
-  (const TrackingParticle& simTrack)
+  (const TrackingParticle& constSimTrack)
 {
   // How many pixel barrel hits?
   int numberOfPixelBarrelHits = 0;
 
-  for(std::vector<PSimHit>::const_iterator simHit = simTrack.pSimHit_begin();
-                                           simHit!= simTrack.pSimHit_end();
-                                           simHit++)
+  // to use trackerPSimHit methods TP cannot be const
+  TrackingParticle simTrack = *(const_cast<TrackingParticle*>(&constSimTrack));
+  
+  for(std::vector<PSimHit>::iterator simHit = simTrack.trackerPSimHit_begin();
+                                     simHit!= simTrack.trackerPSimHit_end();
+                                     simHit++)
   {
     DetId id = DetId(simHit->detUnitId());
 
