@@ -1,0 +1,51 @@
+# Some services
+es_module = GlobalTrackingGeometryESProducer { }
+es_module = TransientTrackBuilderESProducer
+{ string ComponentName = "TransientTrackBuilder" }
+
+# TTRH builder
+es_module myBuilder = ttrhbwr from
+  "RecoTracker/TransientTrackingRecHit/data/TransientTrackingRecHitBuilder.cfi"
+replace myBuilder.StripCPE      = "Fake"
+replace myBuilder.ComponentName = "TTRHBuilderWithoutAngle4PixelTriplets"
+
+# BPixError
+block BPixError =
+{
+  untracked bool useErrorsFromParam = true
+  double hitErrorRPhi = 0.0027
+  double hitErrorRZ   = 0.0060
+}
+
+# FPixError
+block FPixError =
+{
+  untracked bool useErrorsFromParam = true
+  double hitErrorRPhi = 0.0051
+  double hitErrorRZ   = 0.0036
+}
+
+# For valid hit pair filter
+include "TrackingTools/GeomPropagators/data/AnalyticalPropagator.cfi"
+
+# Pixel vertexing
+include "RecoPixelVertexing/PixelVertexFinding/data/PixelVertexes.cff"
+
+# Pixel CPE
+include "RecoLocalTracker/SiPixelRecHits/data/PixelCPEESProducers.cff"
+
+# Global tracks
+include "RecoTracker/CkfPattern/data/CkfTrackCandidates.cff"
+include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasCkfTrajectoryFilterESProducer.cfi"
+replace GroupedCkfTrajectoryBuilder.maxCand              = 5
+replace GroupedCkfTrajectoryBuilder.intermediateCleaning = false
+replace GroupedCkfTrajectoryBuilder.alwaysUseInvalidHits = false
+replace GroupedCkfTrajectoryBuilder.trajectoryFilterName = "MinBiasCkfTrajectoryFilter"
+
+# Trajectory cleaner
+include "TrackingTools/TrajectoryCleaning/data/TrajectoryCleanerBySharedSeeds.cfi"
+
+# Final fit
+include "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cff"
+replace MaterialPropagator.Mass         = 0.139
+replace OppositeMaterialPropagator.Mass = 0.139

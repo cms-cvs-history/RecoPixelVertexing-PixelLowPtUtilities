@@ -1,0 +1,85 @@
+  #############################################################################
+  module secondClusters = TrackClusterRemover
+  {
+    InputTag pixelClusters = siPixelClusters
+    InputTag stripClusters = siStripClusters
+    InputTag trajectories  = globalPrimTracks
+    PSet Common = { double maxChi2 = 999999 }
+  }  
+
+  module secondPixelRecHits = siPixelRecHits from
+    "RecoLocalTracker/SiPixelRecHits/data/SiPixelRecHits.cfi"
+  replace secondPixelRecHits.src=secondClusters:
+
+  module secondStripRecHits = siStripMatchedRecHits from
+    "RecoLocalTracker/SiStripRecHitConverter/data/SiStripRecHitConverter.cfi"
+  replace secondStripRecHits.ClusterProducer = "secondClusters"
+
+  #############################################################################
+  es_module secondLayerTriplets = PixelLayerTripletsESProducer
+  {
+    string ComponentName = "SecondLayerTriplets"
+
+    vstring layerList =
+    { 
+      "BPix1+BPix2+BPix3",
+      "BPix1+BPix2+FPix1_pos",
+      "BPix1+BPix2+FPix1_neg",
+      "BPix1+FPix1_pos+FPix2_pos",
+      "BPix1+FPix1_neg+FPix2_neg"
+    }
+
+    PSet BPix =
+    {
+      string HitProducer = "secondPixelRecHits"
+      string TTRHBuilder = "TTRHBuilderWithoutAngle4PixelTriplets"
+      using BPixError
+    }
+
+    PSet FPix =
+    {
+      string HitProducer = "secondPixelRecHits"
+      string TTRHBuilder = "TTRHBuilderWithoutAngle4PixelTriplets"
+      using FPixError
+    }
+  }
+
+  #############################################################################
+  module  pixelSecoTracks = allPixelTracks from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/AllPixelTracks.cfi"
+  replace pixelSecoTracks.passLabel = "Pixel triplet tracks without vertex constraint" 
+  replace pixelSecoTracks.RegionFactoryPSet.RegionPSet.originRadius = 3.5 // [cm]
+  replace pixelSecoTracks.OrderedHitsFactoryPSet.SeedingLayers = "SecondLayerTriplets"
+
+  #############################################################################
+  # Secondary seeds
+  module secoSeeds = pixelTrackSeeds from
+    "RecoPixelVertexing/PixelLowPtUtilities/data/TrackSeeds.cfi"
+  replace secoSeeds.tripletList = { "pixelSecoTracks" }
+
+  #############################################################################
+  es_module secondMeasurementTracker = MeasurementTracker from
+    "RecoTracker/MeasurementDet/data/MeasurementTrackerESProducer.cfi"
+  replace secondMeasurementTracker.ComponentName = "secondMeasurementTracker"
+  replace secondMeasurementTracker.pixelClusterProducer = "secondClusters"
+  replace secondMeasurementTracker.stripClusterProducer = "secondClusters"
+
+  es_module secondCkfTrajectoryBuilder = GroupedCkfTrajectoryBuilder from
+    "RecoTracker/CkfPattern/data/GroupedCkfTrajectoryBuilderESProducer.cfi"
+  replace secondCkfTrajectoryBuilder.ComponentName = "secondCkfTrajectoryBuilder"
+  replace secondCkfTrajectoryBuilder.MeasurementTrackerName = "secondMeasurementTracker"
+  replace secondCkfTrajectoryBuilder.trajectoryFilterName = "MinBiasCkfTrajectoryFilter"
+
+  module  secoTrackCandidates = ckfTrackCandidates from
+    "RecoTracker/CkfPattern/data/CkfTrackCandidates.cfi"
+  replace secoTrackCandidates.TrajectoryCleaner = "TrajectoryCleanerBySharedSeeds"
+  replace secoTrackCandidates.SeedProducer = "secoSeeds"
+  replace secoTrackCandidates.TrajectoryBuilder = "secondCkfTrajectoryBuilder"
+  replace secoTrackCandidates.RedundantSeedCleaner = "none"
+
+  module  globalSecoTracks = ctfWithMaterialTracks from
+    "RecoTracker/TrackProducer/data/CTFFinalFitWithMaterial.cfi"
+  replace globalSecoTracks.src = "secoTrackCandidates"
+  replace globalSecoTracks.clusterRemovalInfo = secondClusters
+  replace globalSecoTracks.TrajectoryInEvent = true
+
