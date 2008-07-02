@@ -31,27 +31,3 @@
  <use name=SimTracker/TrackerHitAssociation>
  <flags EDM_PLUGIN=1>
 </library>
-<<<<<<< BuildFile
-=======
-
-<library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
- <flags EDM_PLUGIN=1>
-</library>
-
-<library file="EnergyLossEstimator.cc" name="EnergyLossEstimator">
- <flags EDM_PLUGIN=1>
-</library>
-
-<library file="EventPlotter.cc" name="EventPlotter">
- <flags EDM_PLUGIN=1>
-</library>
-
-<library file="ChargedMultiplicityAnalyzer.cc" name="ChargedMultiplicityAnalyzer">
- <flags EDM_PLUGIN=1>
-</library>
-
-<library file="RPVVertexAnalyzer.cc" name="RPVVertexAnalyzer">
- <flags EDM_PLUGIN=1>
-</library>
-
->>>>>>> 1.12
