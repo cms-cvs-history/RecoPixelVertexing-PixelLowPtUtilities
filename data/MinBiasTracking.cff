@@ -1,26 +1,48 @@
   ############################################################################
   # Fake configuration
-  include "CalibTracker/Configuration/data/SiStrip_FakeLorentzAngle.cff"
+//  include "CalibTracker/Configuration/data/SiPixel_FakeConditions.cff"
+//  include "CalibTracker/Configuration/data/SiStrip_FakeConditions.cff"
 
   ############################################################################
-  # Collections
-  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasPixelTracks.cff"
-  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasPixelSeeds.cff"
-  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasGlobalTracks.cff"
-  include "RecoPixelVertexing/PixelLowPtUtilities/data/MinBiasVZeros.cff"
+  # Steps
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/common.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/firstStep.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/secondStep.cff"
+  include "RecoPixelVertexing/PixelLowPtUtilities/data/thirdStep.cff"
+  include "RecoVZero/VZeroFinding/data/VZeros.cff"
 
-  #############################################################################
-  # Sequence
-  sequence minBiasTracking =
+  ############################################################################
+  # Track list combiner
+  module allTracks = TrackListCombiner
   {
-    pixel3ProtoTracks,
-    #
-    pixelVertices,     pixel3PrimTracks,
-    pixelFreeSecoHits, pixelSecoTracks,
-    #
-    primSeeds, primTrackCandidates, globalPrimTracks,
-    secoSeeds, secoTrackCandidates, globalSecoTracks,
-    #
-    pixelVZeros
+#   VInputTag trackProducers =
+    vstring trackProducers =
+    { "globalPrimTracks", "globalSecoTracks" }
+#   { "globalPrimTracks", "globalSecoTracks", "globalTertTracks" }
   }
 
+  #############################################################################
+  # Sequences
+  sequence firstStep = 
+  {
+    pixel3ProtoTracks, pixelVertices,
+    pixel3PrimTracks, primSeeds, primTrackCandidates, globalPrimTracks
+  }
+
+  sequence secondStep =
+  {
+    secondClusters, secondPixelRecHits, secondStripRecHits,
+    pixelSecoTracks,  secoSeeds, secoTrackCandidates, globalSecoTracks
+  }
+
+  sequence thirdStep =
+  {
+    thirdClusters , thirdPixelRecHits , thirdStripRecHits ,
+    pixel2PrimTracks, tertSeeds, tertTrackCandidates, globalTertTracks
+  }
+
+  sequence minBiasTracking =
+  {
+    # firstStep, secondStep, thirdStep, allTracks
+    firstStep, secondStep, allTracks
+  }

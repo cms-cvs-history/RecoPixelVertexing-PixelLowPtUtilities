@@ -16,19 +16,13 @@
 
 <use name=RecoPixelVertexing/PixelLowPtUtilities>
 
-<use name=DataFormats/VZero>
-<use name=RecoVertex/VertexTools>
-
 <use name=SimDataFormats/TrackingAnalysis>
 <use name=SimDataFormats/Track>
 <use name=SimDataFormats/Vertex>
 <use name=SimDataFormats/HepMCProduct>
 
 <use name=SimTracker/TrackAssociation>
-
 <use name=Geometry/TrackerTopology>
-
-<use name=RecoVertex/KalmanVertexFit>
 
 <use name=clhep>
 <use name=geant4>
@@ -37,6 +31,8 @@
  <use name=SimTracker/TrackerHitAssociation>
  <flags EDM_PLUGIN=1>
 </library>
+<<<<<<< BuildFile
+=======
 
 <library file="LowPtTrackAnalyzer.cc" name="LowPtTrackAnalyzer">
  <flags EDM_PLUGIN=1>
@@ -58,3 +54,4 @@
  <flags EDM_PLUGIN=1>
 </library>
 
+>>>>>>> 1.12
