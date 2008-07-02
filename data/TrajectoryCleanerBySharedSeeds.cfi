@@ -1,3 +1,0 @@
-es_module trajectoryCleanerBySharedSeeds = TrajectoryCleanerESProducer {
-	string ComponentName = "TrajectoryCleanerBySharedSeeds"
-}
