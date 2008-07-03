@@ -3,11 +3,15 @@ es_module = GlobalTrackingGeometryESProducer { }
 es_module = TransientTrackBuilderESProducer
 { string ComponentName = "TransientTrackBuilder" }
 
+include "Configuration/StandardSequences/data/MagneticField.cff"
+
 # TTRH builder
 es_module myBuilder = ttrhbwr from
   "RecoTracker/TransientTrackingRecHit/data/TransientTrackingRecHitBuilder.cfi"
 replace myBuilder.StripCPE      = "Fake"
 replace myBuilder.ComponentName = "TTRHBuilderWithoutAngle4PixelTriplets"
+
+es_prefer myBuilder = TkTransientTrackingRecHitBuilderESProducer { }
 
 # BPixError
 block BPixError =

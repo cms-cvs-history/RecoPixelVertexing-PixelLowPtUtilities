@@ -18,7 +18,7 @@ module allPixelTracks = PixelTrackProducerWithZPos
       bool precise          = true
 
       bool useFoundVertices = false // true
-      string VertexCollection = "pixelVertices"
+      InputTag VertexCollection = "pixelVertices"
     
       double sigmaZVertex = 3.0 // times
       bool useFixedError  = true
