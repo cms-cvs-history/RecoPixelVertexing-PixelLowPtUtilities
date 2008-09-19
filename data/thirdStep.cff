@@ -51,7 +51,7 @@
     "RecoPixelVertexing/PixelLowPtUtilities/data/AllPixelTracks.cfi"
   replace pixel2PrimTracks.passLabel = "Pixel pair tracks with vertex constraint" 
   replace pixel2PrimTracks.RegionFactoryPSet.RegionPSet.useFoundVertices = true
-  replace pixel2PrimTracks.RegionFactoryPSet.RegionPSet.fixedError = 0.2 // [cm]
+// replace pixel2PrimTracks.RegionFactoryPSet.RegionPSet.fixedError = 0.2 // [cm]
   replace pixel2PrimTracks.OrderedHitsFactoryPSet.ComponentName = "StandardHitPairGenerator"
   replace pixel2PrimTracks.OrderedHitsFactoryPSet.SeedingLayers = "thirdLayerPairs"
   replace pixel2PrimTracks.OrderedHitsFactoryPSet.GeneratorPSet.ComponentName = "StandardHitPairGenerator"

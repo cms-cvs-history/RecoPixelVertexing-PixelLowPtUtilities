@@ -1,11 +1,9 @@
   ############################################################################
-  # Fake configuration
-//  include "CalibTracker/Configuration/data/SiPixel_FakeConditions.cff"
-//  include "CalibTracker/Configuration/data/SiStrip_FakeConditions.cff"
-
-  ############################################################################
   # Steps
   include "RecoPixelVertexing/PixelLowPtUtilities/data/common.cff"
+  replace ckfBaseTrajectoryFilterForMinBias.filterPset.minimumNumberOfHits = 3
+  replace ckfBaseTrajectoryFilterForMinBias.filterPset.minPt           = 0.075
+
   include "RecoPixelVertexing/PixelLowPtUtilities/data/firstStep.cff"
   include "RecoPixelVertexing/PixelLowPtUtilities/data/secondStep.cff"
   include "RecoPixelVertexing/PixelLowPtUtilities/data/thirdStep.cff"

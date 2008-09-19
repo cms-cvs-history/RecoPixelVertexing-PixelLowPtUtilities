@@ -5,8 +5,8 @@ es_module ckfBaseTrajectoryFilterForMinBias = trajectoryFilterESProducer
 
 replace ckfBaseTrajectoryFilterForMinBias.ComponentName = 
   "ckfBaseTrajectoryFilterForMinBias"
-replace ckfBaseTrajectoryFilterForMinBias.filterPset.minimumNumberOfHits = 3 
-replace ckfBaseTrajectoryFilterForMinBias.filterPset.minPt               = 0.075
+#replace ckfBaseTrajectoryFilterForMinBias.filterPset.minimumNumberOfHits = 3 
+#replace ckfBaseTrajectoryFilterForMinBias.filterPset.minPt               = 0.075
 
 # ClusterShape
 es_module clusterShapeTrajectoryFilterESProducer =
