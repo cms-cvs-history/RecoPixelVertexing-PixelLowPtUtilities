@@ -1,5 +1,7 @@
 <use name=boost>
 <use name=root>
+<use name=clhep>
+<use name=geant4>
 
 <use name=FWCore/Framework>
 <use name=FWCore/PluginManager>
@@ -10,10 +12,6 @@
 <use name=Geometry/TrackerGeometryBuilder>
 
 <use name=DataFormats/TrackerRecHit2D>
-<use name=RecoTracker/TkHitPairs>
-<use name=RecoTracker/TkTrackingRegions>
-<use name=RecoPixelVertexing/PixelTriplets>
-
 <use name=RecoPixelVertexing/PixelLowPtUtilities>
 
 <use name=SimDataFormats/TrackingAnalysis>
@@ -23,9 +21,6 @@
 
 <use name=SimTracker/TrackAssociation>
 <use name=Geometry/TrackerTopology>
-
-<use name=clhep>
-<use name=geant4>
 
 <library file="ClusterShapeExtractor.cc" name="ClusterShapeExtractor">
  <use name=SimTracker/TrackerHitAssociation>
