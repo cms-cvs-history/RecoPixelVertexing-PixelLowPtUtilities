@@ -1,28 +1,18 @@
 <use name=boost>
 <use name=root>
-<use name=clhep>
 <use name=geant4>
 
 <use name=FWCore/Framework>
-<use name=FWCore/PluginManager>
-<use name=FWCore/ParameterSet>
 
-<use name=Geometry/Records>
 <use name=Geometry/CommonDetUnit>
+<use name=Geometry/Records>
 <use name=Geometry/TrackerGeometryBuilder>
 
 <use name=DataFormats/TrackerRecHit2D>
 <use name=RecoPixelVertexing/PixelLowPtUtilities>
-
-<use name=SimDataFormats/TrackingAnalysis>
-<use name=SimDataFormats/Track>
-<use name=SimDataFormats/Vertex>
-<use name=SimDataFormats/GeneratorProducts>
-
-<use name=SimTracker/TrackAssociation>
-<use name=Geometry/TrackerTopology>
+<use name=SimDataFormats/TrackingHit>
+<use name=SimTracker/TrackerHitAssociation>
 
 <library file="ClusterShapeExtractor.cc" name="ClusterShapeExtractor">
- <use name=SimTracker/TrackerHitAssociation>
  <flags EDM_PLUGIN=1>
 </library>
