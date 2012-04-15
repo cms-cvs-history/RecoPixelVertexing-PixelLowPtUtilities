@@ -19,7 +19,7 @@ class PixelClusterShapeSeedComparitor : public SeedComparitor {
         PixelClusterShapeSeedComparitor(const edm::ParameterSet &cfg) ;
         virtual ~PixelClusterShapeSeedComparitor() ; 
         virtual void init(const edm::EventSetup& es) ;
-        virtual bool compatible(const SeedingHitSet  &hits, const TrackingRegion & region) const { return true; }
+        virtual bool compatible(const SeedingHitSet  &hits, const TrackingRegion & region) { return true; }
         virtual bool compatible(const TrajectorySeed &seed) const { return true; }
         virtual bool compatible(const TrajectoryStateOnSurface &,
                 const TransientTrackingRecHit::ConstRecHitPointer &hit) const ;
@@ -127,8 +127,10 @@ PixelClusterShapeSeedComparitor::compatibleHit(const TransientTrackingRecHit &hi
         if (tid == typeid(SiStripMatchedRecHit2D)) {
             const SiStripMatchedRecHit2D* matchedHit = dynamic_cast<const SiStripMatchedRecHit2D *>(hit.hit());
             assert(matchedHit != 0);
-            return (filterHandle_->isCompatible(DetId(matchedHit->monoId()), matchedHit->monoCluster(), direction) &&
-                    filterHandle_->isCompatible(DetId(matchedHit->stereoId()), matchedHit->stereoCluster(), direction));
+            //return (filterHandle_->isCompatible(DetId(matchedHit->monoId()), matchedHit->monoCluster(), direction) &&
+            //        filterHandle_->isCompatible(DetId(matchedHit->stereoId()), matchedHit->stereoCluster(), direction));
+            return (filterHandle_->isCompatible(*(matchedHit->monoHit()), direction) &&
+                    filterHandle_->isCompatible(*(matchedHit->stereoHit()), direction));
         } else if (tid == typeid(SiStripRecHit2D)) {
             const SiStripRecHit2D* recHit = dynamic_cast<const SiStripRecHit2D *>(hit.hit());
             assert(recHit != 0);
