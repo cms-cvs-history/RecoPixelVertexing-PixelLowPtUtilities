@@ -11,7 +11,7 @@
 /*****************************************************************************/
 ClusterShapeHitFilterESProducer::ClusterShapeHitFilterESProducer
   (const edm::ParameterSet& iConfig):
-  use_PixelShapeFile( iConfig.getParameter<std::string>("PixelShapeFile"))
+  use_PixelShapeFile( iConfig.exists("PixelShapeFile")?iConfig.getParameter<std::string>("PixelShapeFile"):"RecoPixelVertexing/PixelLowPtUtilities/data/pixelShape.par")
 {
   
   std::string componentName = iConfig.getParameter<std::string>("ComponentName");
