@@ -123,11 +123,14 @@ void TrackListCombiner::produce(edm::Event& ev, const edm::EventSetup& es)
   for(unsigned index = 0; index < nTracks; ++index )
   { 
     reco::Track& aTrack = recoTracks->at(index);
-    reco::TrackExtra aTrackExtra(aTrack.outerPosition(),
-                                 aTrack.outerMomentum(),
+
+// Use the modified onstructor (AA)
+    reco::TrackExtra aTrackExtra(
+//                                 aTrack.outerPosition(),
+//                                 aTrack.outerMomentum(),
                                  aTrack.outerOk(),
-                                 aTrack.innerPosition(),
-                                 aTrack.innerMomentum(),
+//                                 aTrack.innerPosition(),
+//                                 aTrack.innerMomentum(),
                                  aTrack.innerOk(),
                                  aTrack.outerStateCovariance(),
                                  aTrack.outerDetId(),
